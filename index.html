@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Gran sorteo pegate y gana para tu madre</title>
+<style>
+body{
+    font-family: Arial, sans-serif;
+    margin:0;
+    background: linear-gradient(135deg,#0f172a,#1e3a8a,#2563eb);
+    color:white;
+}
+.container{
+    max-width:1100px;
+    margin:auto;
+    padding:20px;
+}
+header{
+    text-align:center;
+    padding:20px;
+}
+header h1{
+    margin:0;
+    font-size:32px;
+}
+header p{
+    font-size:18px;
+}
+.info{
+    background:rgba(255,255,255,0.1);
+    padding:15px;
+    border-radius:12px;
+    margin-bottom:20px;
+}
+.form-box{
+    background:white;
+    color:black;
+    padding:20px;
+    border-radius:12px;
+    margin-bottom:20px;
+}
+input, button{
+    width:100%;
+    padding:12px;
+    margin-top:10px;
+    border-radius:8px;
+    border:1px solid #ccc;
+    font-size:16px;
+}
+button{
+    background:#2563eb;
+    color:white;
+    border:none;
+    cursor:pointer;
+    font-weight:bold;
+}
+button:hover{
+    background:#1d4ed8;
+}
+.grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(70px,1fr));
+    gap:10px;
+}
+.number{
+    padding:15px;
+    text-align:center;
+    border-radius:10px;
+    font-weight:bold;
+    cursor:pointer;
+}
+.free{
+    background:#16a34a;
+}
+.busy{
+    background:#dc2626;
+    cursor:not-allowed;
+}
+.selected{
+    outline:3px solid yellow;
+}
+footer{
+    text-align:center;
+    padding:20px;
+    opacity:0.9;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+<header>
+<h1>🎉 Gran sorteo pegate y gana para tu madre 🎉</h1>
+<p>100 números disponibles | RD$100 por número</p>
+<p>Sorteo por la lotería</p>
+</header>
+
+<div class="info">
+Selecciona un número disponible (verde), escribe tu nombre y reserva.
+Los números en rojo ya están ocupados.
+</div>
+
+<div class="form-box">
+<label>Nombre completo:</label>
+<input type="text" id="nombre" placeholder="Escribe tu nombre">
+
+<label>Número seleccionado:</label>
+<input type="text" id="numero" readonly placeholder="Selecciona abajo">
+
+<button onclick="reservar()">Reservar número</button>
+</div>
+
+<div class="grid" id="tabla"></div>
+
+<footer>
+Rifa electrónica creada para compartir por enlace.
+</footer>
+</div>
+
+<script>
+let ocupados = JSON.parse(localStorage.getItem("rifa_ocupados")) || {};
+let seleccionado = null;
+
+function guardar(){
+    localStorage.setItem("rifa_ocupados", JSON.stringify(ocupados));
+}
+
+function crearTabla(){
+    let tabla = document.getElementById("tabla");
+    tabla.innerHTML = "";
+
+    for(let i=1;i<=100;i++){
+        let div = document.createElement("div");
+        div.classList.add("number");
+
+        if(ocupados[i]){
+            div.classList.add("busy");
+            div.innerHTML = i + "<br><small>" + ocupados[i] + "</small>";
+        }else{
+            div.classList.add("free");
+            div.innerHTML = i;
+            div.onclick = ()=>seleccionarNumero(i);
+        }
+
+        if(seleccionado == i){
+            div.classList.add("selected");
+        }
+
+        tabla.appendChild(div);
+    }
+}
+
+function seleccionarNumero(num){
+    if(ocupados[num]){
+        alert("Ese número está ocupado.");
+        return;
+    }
+    seleccionado = num;
+    document.getElementById("numero").value = num;
+    crearTabla();
+}
+
+function reservar(){
+    let nombre = document.getElementById("nombre").value.trim();
+
+    if(nombre == ""){
+        alert("Escribe tu nombre.");
+        return;
+    }
+
+    if(!seleccionado){
+        alert("Selecciona un número.");
+        return;
+    }
+
+    if(ocupados[seleccionado]){
+        alert("Ese número ya fue ocupado.");
+        crearTabla();
+        return;
+    }
+
+    ocupados[seleccionado] = nombre;
+    guardar();
+
+    alert("Número " + seleccionado + " reservado para " + nombre);
+
+    document.getElementById("nombre").value = "";
+    document.getElementById("numero").value = "";
+    seleccionado = null;
+
+    crearTabla();
+}
+
+crearTabla();
+</script>
+
+</body>
+</html>
